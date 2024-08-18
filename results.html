@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نتائج اليوم</title>
+  <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js library -->
+</head>
+<body>
+  <div class="container">
+    <button onclick="goBack()">🔙</button>
+    <h1>نتائج اليوم</h1>
+    <div id="results">
+      <!-- Daily results will be inserted here dynamically -->
+    </div>
+    <canvas id="dailyChart" width="400" height="200"></canvas>
+  </div>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+
+    function goBack() {
+      window.location.href = 'inventory.html';
+    }
+
+    function fetchDailyResults() {
+      const today = new Date().toISOString().split('T')[0]; // Get today's date in YYYY-MM-DD format
+      ipcRenderer.send('fetch-daily-results', today);
+    }
+
+    ipcRenderer.on('daily-results', (event, data) => {
+      displayResults(data);
+      displayChart(data);
+    });
+
+    function displayResults(data) {
+      const resultsContainer = document.getElementById('results');
+      resultsContainer.innerHTML = ''; // Clear previous results
+
+      if (data.length === 0) {
+        resultsContainer.innerHTML = '<p>لا توجد نتائج لهذا اليوم.</p>';
+        return;
+      }
+
+      const table = document.createElement('table');
+      const thead = document.createElement('thead');
+      const tbody = document.createElement('tbody');
+
+      table.appendChild(thead);
+      table.appendChild(tbody);
+
+      thead.innerHTML = `
+        <tr>
+          <th>الرقم التعريفي</th>
+          <th>اسم العنصر</th>
+          <th>الكمية الحالية</th>
+          <th>كمية الاصلية</th>
+          <th>الكمية الصادرة</th>
+          <th>تاجر</th>
+          <th>فئة</th>
+          <th>باركود العنصر</th>
+        </tr>
+      `;
+
+      data.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.iditem}</td>
+          <td>${item.itemName}</td>
+          <td>${item.itemsQuantity}</td>
+          <td>${item.OrginalStock}</td>
+          <td>${item.OrginalStock - item.itemsQuantity}</td>
+          <td>${item.supplier}</td>
+          <td>${item.categorie}</td>
+          <td>${item.itemBarcode}</td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      resultsContainer.appendChild(table);
+    }
+
+    function displayChart(data) {
+      const ctx = document.getElementById('dailyChart').getContext('2d');
+      const labels = data.map(item => item.itemName);
+      const quantities = data.map(item => item.itemsQuantity);
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'الكمية الحالية',
+            data: quantities,
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    fetchDailyResults(); // Fetch and display data when the page loads
+  </script>
+</body>
+</html>

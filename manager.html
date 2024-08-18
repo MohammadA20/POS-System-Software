@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Employee</title>
+<link rel="stylesheet" href="manager.css">
+</head>
+
+<body>
+    <button class="back" onclick="goBack()">🔙</button>
+    <div class="container">
+        <h2>  Manage Employee / ادارة العاملين</h2>
+        <form id="employeeForm">
+            <input type="text" id="username" name="username" placeholder="أسم الموظف" required>
+
+            <input type="password" id="password" name="password" placeholder="انشاء كلمة سر" required>
+            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="تأكيد كلمة السر" required>
+
+            <div class="show-password">
+                <input type="checkbox" id="showPassword"> <label for="showPassword">Show Password</label>
+            </div>
+
+            <div class="radio-group">
+                <label><input type="radio" name="type" value="employee" required> موظف</label>
+                <label><input type="radio" name="type" value="admin" required> ادارة</label>
+            </div>
+
+            <button type="submit">Submit</button>
+        </form>
+        <div id="passwordError">Password must start with a capital letter and be followed by at least 7 characters.</div>
+        <div id="successMessage" class="success-message">Employee added successfully!</div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        document.getElementById('employeeForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const type = document.querySelector('input[name="type"]:checked').value;
+
+            if (!validatePassword(password)) {
+                document.getElementById('passwordError').style.display = 'block';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                document.getElementById('passwordError').textContent = 'Passwords do not match.';
+                document.getElementById('passwordError').style.display = 'block';
+                return;
+            }
+
+            const formData = {
+                username,
+                password,
+                type
+            };
+
+            ipcRenderer.send('submitEmployeeForm', formData);
+            
+            // Clear form fields
+            document.getElementById('employeeForm').reset();
+            
+            // Hide password error
+            document.getElementById('passwordError').style.display = 'none';
+
+            // Show success message
+            document.getElementById('successMessage').style.display = 'block';
+            
+            // Hide success message after 3 seconds
+            setTimeout(() => {
+                document.getElementById('successMessage').style.display = 'none';
+            }, 30000);
+        });
+
+        document.getElementById('showPassword').addEventListener('change', (event) => {
+            const passwordField = document.getElementById('password');
+            const confirmPasswordField = document.getElementById('confirmPassword');
+            if (event.target.checked) {
+                passwordField.type = 'text';
+                confirmPasswordField.type = 'text';
+            } else {
+                passwordField.type = 'password';
+                confirmPasswordField.type = 'password';
+            }
+        });
+        function validatePassword(password) {
+    // Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one digit, and one special character (including _)
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*#?&_])[A-Za-z\d@$!%*#?&_]{8,}$/;
+    return passwordRegex.test(password);
+}
+
+// Example usage:
+console.log(validatePassword('MohAdada2024_ss20')); //
+
+
+        function goBack() {
+            console.log("Navigating back to Home.html");
+            window.location.href = "Home.html";
+        }
+    </script>
+</body>
+
+</html>

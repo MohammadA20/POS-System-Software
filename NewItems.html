@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Items Form</title>
+  <link rel="stylesheet" type="text/css" href="NewItems.css">
+  <style>
+    .back-button {
+      background-color: #ffffff;
+      border: none;
+      color: white;
+      padding: 5px 20px;
+      text-align: center;
+      font-size: 16px;
+      transition-duration: 0.4s;
+      cursor: pointer;
+      border-radius: 8px;
+      border: 2px solid #000000;
+      margin-top: 15px;
+      margin-left: 10px;
+    }
+
+    .back-button:hover {
+      background-color: rgb(255, 0, 0);
+      color: #4CAF50;
+    }
+
+    .back-button:hover::after {
+      display: inline-block;
+      animation: slideLeft 0.4s ease-in-out forwards;
+    }
+  </style>
+</head>
+
+<body>
+  <button onclick="goBack()" class="back-button">🔙</button>
+  <div class="container">
+    <div class="search-container">
+      <input type="text" id="searchInput" oninput="filterItems()" placeholder="Search for items...">
+     
+    </div>
+    
+    <form id="newItemForm" class="form-grid">
+      <fieldset>
+        <legend>تفاصيل المنتج / Product Details</legend>
+
+        <div class="AutoFillBOX">
+          <select id="inventorySelect"></select>
+        </div>
+
+        <div class="input-group">
+          <label for="itemName">أسم المنتج / Item Name</label>
+          <input type="text" id="itemName" name="itemName">
+        </div>
+
+        <div >
+          <label for="itemsQuantity">الكمية / Quantity</label>
+          <input type="number" id="itemsQuantity" name="itemsQuantity" style="width: 90px;"> <br>
+     
+
+        </div>
+
+        <div class="input-group">
+          <label for="pricePerItem">كلفة المنتج / Product Cost</label>
+          <input type="number" id="pricePerItem" name="pricePerItem">
+        </div>
+
+        <div class="input-group">
+          <label for="SellPrice">سعر المبيع / Selling Price</label>
+          <input type="number" id="SellPrice" name="SellPrice">
+        </div>
+
+        <div class="input-group">
+          <label for="itemBarcode">باركود / Barcode</label>
+          <input type="text" id="itemBarcode" name="itemBarcode">
+        </div>
+
+        <div class="input-group">
+          <label for="supplier">التاجر / Supplier</label>
+          <select id="supplier" name="suppliers"></select>
+        </div>
+
+        <div class="input-group">
+          <label for="categorie">الفئة / Category</label>
+          <select id="categorie" name="categorie"></select>
+        </div>
+        <div class="input-group">
+          <label for="expireDate">تاريخ الانتهاء / Expire Date</label>
+          <input type="date" id="expireDate" name="expireDate">
+        </div>
+        
+
+        <button type="button" onclick="BarcodeGenerator()">إنشاء باركود / Generate Barcodes</button>
+        <button type="button" onclick="submitNewItem()">إرسال / Submit</button>
+      </fieldset>
+    </form>
+    
+    <div class="insert-form">
+      <form onsubmit="insertSupplier(); return false;">
+        <label for="supplierInput">إضافة تاجر جديد / Add New Supplier:</label>
+        <input type="text" id="supplierInput" required placeholder="اسم التاجر / Supplier Name">
+        <input type="text" id="suppliernumber" required placeholder="رقم الهاتف / Phone number">
+        <input type="text" id="supplierlocation" required placeholder="موقع التاجر / Supplier location">
+        <button type="submit">إضافة تاجر / Insert Supplier</button>
+      </form>
+
+      <form onsubmit="insertCategory(); return false;">
+        <label for="categoryInput">إضافة فئة جديدة / Add New Category:</label>
+        <input type="text" id="categoryInput" placeholder="اسم الفئة / Category Name">
+        <button type="submit">إضافة فئة / Insert Category</button>
+      </form>
+      
+    </div>
+    
+  </div>
+
+  <script>
+    const ipcRenderer = require("electron").ipcRenderer;
+
+    ipcRenderer.on("inventory-data", (event, results) => {
+      populateItemsDropdown(results);
+    });
+
+    ipcRenderer.on("items-fetched", (event, items) => {
+      populateItemsDropdown(items);
+    });
+
+    ipcRenderer.on("supplier-inserted", (event, result) => {
+      if (result.success) {
+        ipcRenderer.send("fetch-suppliers"); // Fetch updated suppliers list
+      } else {
+        console.error(result.error);
+      }
+    });
+
+    ipcRenderer.on("category-inserted", (event, result) => {
+      if (result.success) {
+        ipcRenderer.send("fetch-categories"); // Fetch updated categories list
+      } else {
+        console.error(result.error);
+      }
+    });
+
+    ipcRenderer.on("item-inserted", (event, result) => {
+      if (result.success) {
+        ipcRenderer.send("fetch-items"); // Fetch updated items list
+      } else {
+        console.error(result.error);
+      }
+    });
+
+    function populateItemsDropdown(items) {
+  const selectElement = document.getElementById("inventorySelect");
+  selectElement.innerHTML = ""; // Clear the dropdown
+
+  const defaultOption = document.createElement("option");
+  defaultOption.text = "Select Item to Update";
+  defaultOption.value = "";
+  selectElement.appendChild(defaultOption);
+
+  items.forEach((item) => {
+    const option = document.createElement("option");
+    option.value = item.iditem; // Use item id as the value
+    option.textContent = `${item.itemName} - ${item.pricePerItem}`;
+    option.dataset.barcode = item.itemBarcode;
+    option.dataset.quantity = item.itemsQuantity;
+    option.dataset.price = item.pricePerItem;
+    option.dataset.sellPrice = item.SellPrice;
+    option.dataset.oldCategory = item.categorie; // Store old category in dataset
+    option.dataset.oldSupplier = item.supplier; // Store old supplier in dataset
+
+    // Format the expire date to yyyy-MM-dd without converting to UTC
+    if (item.expire_date) {
+      const expireDate = new Date(item.expire_date);
+      const year = expireDate.getFullYear();
+      const month = String(expireDate.getMonth() + 1).padStart(2, '0');
+      const day = String(expireDate.getDate()).padStart(2, '0');
+      const formattedExpireDate = `${year}-${month}-${day}`;
+      option.dataset.expireDate = formattedExpireDate;
+    } else {
+      option.dataset.expireDate = '';
+    }
+
+    selectElement.appendChild(option);
+  });
+
+  selectElement.addEventListener("change", function () {
+    const selectedOption = selectElement.options[selectElement.selectedIndex];
+    document.getElementById("itemName").value = selectedOption.textContent.split(" - ")[0].trim();
+    document.getElementById("itemsQuantity").value = selectedOption.dataset.quantity;
+    document.getElementById("pricePerItem").value = selectedOption.dataset.price;
+    document.getElementById("SellPrice").value = selectedOption.dataset.sellPrice;
+    document.getElementById("itemBarcode").value = selectedOption.dataset.barcode;
+    document.getElementById("expireDate").value = selectedOption.dataset.expireDate;
+
+    // Set the selected option for supplier and category
+    document.getElementById("supplier").value = selectedOption.dataset.oldSupplier;
+    document.getElementById("categorie").value = selectedOption.dataset.oldCategory;
+  });
+}
+
+
+
+    function filterItems() {
+      const input = document.getElementById("searchInput");
+      const filter = input.value.toUpperCase();
+      const select = document.getElementById("inventorySelect");
+      const options = select.getElementsByTagName("option");
+
+      for (let i = 0; i < options.length; i++) {
+        const textValue = options[i].textContent || options[i].innerText;
+        if (textValue.toUpperCase().indexOf(filter) > -1) {
+          options[i].style.display = "";
+        } else {
+          options[i].style.display = "none";
+        }
+      }
+    }
+
+    function generatebarcodeBox(timestamp) {
+      const uniqueIdentifierBox = Math.floor(Math.random() * 10000);
+      const barcodeBox = `${timestamp}${uniqueIdentifierBox}`.substring(0, 13);
+    }
+
+    function BarcodeGenerator() {
+      const timestamp = new Date().getTime();
+      generatebarcodeBox(timestamp);
+      generatebarcodeItem(timestamp + 1);
+    }
+
+    function generatebarcodeItem(timestamp) {
+      const uniqueIdentifierItem = Math.floor(Math.random() * 10000);
+      const barcodeItem = `${timestamp}${uniqueIdentifierItem}`.substring(0, 13);
+      document.getElementById("itemBarcode").value = barcodeItem;
+    }
+
+    function submitNewItem() {
+      const itemName = document.getElementById("itemName").value;
+      const itemsQuantity = document.getElementById("itemsQuantity").value;
+      const OrginalStock = document.getElementById("itemsQuantity").value;
+      const pricePerItem = document.getElementById("pricePerItem").value;
+      const itemBarcode = document.getElementById("itemBarcode").value;
+      const SellPrice = document.getElementById("SellPrice").value;
+      const expire_date = document.getElementById("expireDate").value;
+      const supplier = document.getElementById("supplier").value;
+      const categorie = document.getElementById("categorie").value;
+      const inventorySelect = document.getElementById("inventorySelect");
+      const iditem = inventorySelect.options[inventorySelect.selectedIndex].value;
+
+      document.getElementById("itemName").value = "";
+      document.getElementById("itemsQuantity").value = "";
+      document.getElementById("pricePerItem").value = "";
+      document.getElementById("itemBarcode").value = "";
+      document.getElementById("SellPrice").value = "";
+      document.getElementById("expireDate").value = "";
+      document.getElementById("supplier").value = "";
+      document.getElementById("categorie").value = "";
+
+      try {
+        ipcRenderer
+          .invoke("insert-item", {
+            iditem: iditem || null, // Pass iditem if it exists
+            itemName,
+            itemsQuantity,
+            pricePerItem,
+            itemBarcode,
+            SellPrice,
+            OrginalStock,
+            supplier,
+            categorie,
+            expire_date, // Add the expireDate value here
+          })
+          .then((result) => {
+            if (result.success) {
+              // Handle success case
+              console.log(result.message);
+            } else {
+              // Handle failure case
+              console.error(result.error);
+            }
+
+            document.getElementById("newItemForm").reset();
+          });
+      } catch (error) {
+        console.error("Error submitting new item:", error);
+      }
+    }
+
+
+    function goBack() {
+      window.location.href = "Home.html";
+    }
+
+    ipcRenderer.on("categories-fetched", (event, categories) => {
+      const categorySelect = document.getElementById("categorie");
+
+      categorySelect.innerHTML = "";
+
+      if (Array.isArray(categories) && categories.length > 0) {
+        categories.forEach((categorie_name) => {
+          const option = document.createElement("option");
+          option.value = categorie_name.categorie_name;
+          option.textContent = categorie_name.categorie_name;
+          categorySelect.appendChild(option);
+        });
+      } else {
+        console.error("No categories fetched or categories array is invalid.");
+      }
+    });
+
+    ipcRenderer.send("fetch-categories");
+
+    ipcRenderer.on("suppliers-fetched", (event, datafromdb) => {
+      const supplierSelect = document.getElementById("supplier");
+
+      supplierSelect.innerHTML = "";
+
+      if (Array.isArray(datafromdb) && datafromdb.length > 0) {
+        datafromdb.forEach((supplier) => {
+          const option = document.createElement("option");
+          option.value = supplier.supplier;
+          option.textContent = supplier.supplier + " | Location: " + supplier.supplier_Location + " | Phone Number: " + supplier.Phone_Number;
+          supplierSelect.appendChild(option);
+        });
+      } else {
+        console.error("No suppliers fetched or suppliers array is invalid.");
+      }
+    });
+
+    ipcRenderer.send("fetch-suppliers");
+
+    ipcRenderer.on("supplier-inserted", (event, result) => {
+      if (result.success) {
+        ipcRenderer.send("fetch-suppliers"); // Fetch updated suppliers list
+      } else {
+        console.error(result.error);
+      }
+    });
+
+    ipcRenderer.on("category-inserted", (event, result) => {
+      if (result.success) {
+        ipcRenderer.send("fetch-categories"); // Fetch updated categories list
+      } else {
+        console.error(result.error);
+      }
+    });
+
+    function insertSupplier() {
+      const supp = document.getElementById("supplierInput").value;
+      const suppnum = document.getElementById("suppliernumber").value;
+      const supploc = document.getElementById("supplierlocation").value;
+
+      if (supp && suppnum && supploc) {
+        ipcRenderer.send("insert-supplier", { supp, suppnum, supploc });
+        document.getElementById("supplierInput").value = "";
+        document.getElementById("suppliernumber").value = "";
+        document.getElementById("supplierlocation").value = "";
+      } else {
+        alert("Please fill in all fields for the supplier.");
+      }
+    }
+
+    function insertCategory() {
+      const catego = document.getElementById("categoryInput").value;
+
+      if (catego) {
+        ipcRenderer.send("insert-category", { catego });
+        document.getElementById("categoryInput").value = "";
+      } else {
+        alert("Please enter a category name.");
+      }
+    }
+
+
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quick Menu</title>
+    <link rel="stylesheet" href="Qstyle.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <button class="back" onclick="goBack()">🔙</button>
+            <h1>Quick Menu</h1>
+        </header>
+        <main>
+            <section class="add-item">
+                <h2>Add New Item / اضافة منتج جديد</h2>
+                <form id="addItemForm">
+                    <input type="text" id="itemName" placeholder="Item Name" required>
+                    <input type="number" id="pricePerItem" placeholder="Price Per Item" step="0.01" required>
+                    <input type="number" id="itemPrice" placeholder="SellPrice" step="0.01" required>
+                    <input type="number" id="itemQuantity" placeholder="Item Quantity" min="1" required>
+                    <button type="button" id="addItemButton">Add Item</button>
+                </form>
+            </section>
+            <section class="menu-list">
+                <table id="menuTable">
+                    <thead>
+                        <tr>
+                            <th>Name / اسم المنتج</th>
+                            <th>Price / السعر</th>
+                            <th>Price Per Item / سعر الجملة</th>
+                            <th>Quantity / كمية</th>
+                            <th>Action / اجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="menuList"></tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+    <script>
+        const { ipcRenderer } = require('electron');
+        const mysql = require('mysql2');
+
+        // Setup the database connection
+        const pool = mysql.createPool({
+            host: 'localhost',
+            user: 'root',
+            password: 'Test@1234',
+            database: 'supermarket',
+            waitForConnections: true,
+            connectionLimit: 10,
+            queueLimit: 0
+        });
+
+        function fetchAndDisplayMenuItems() {
+            pool.promise().query('SELECT itemname, sellprice, itemsQuantity, pricePerItem FROM items WHERE type ="quick_menu"')
+                .then(([rows, fields]) => {
+                    displayMenuItems(rows);
+                })
+                .catch(error => {
+                    console.error('Error fetching menu items:', error);
+                    alert('Error fetching menu items.');
+                });
+        }
+        function displayMenuItems(menuItems) {
+            const menuList = document.getElementById('menuList');
+            menuList.innerHTML = ''; // Clear existing items
+
+            menuItems.forEach(item => {
+                const row = document.createElement('tr');
+
+                // Creating cells in the order specified
+                const nameCell = document.createElement('td');
+                nameCell.textContent = item.itemname;
+                row.appendChild(nameCell);
+
+                const priceCell = document.createElement('td');
+                priceCell.textContent = item.sellprice;
+                row.appendChild(priceCell);
+
+                const pricePerItemCell = document.createElement('td');
+                pricePerItemCell.textContent = item.pricePerItem;
+                row.appendChild(pricePerItemCell);
+
+                const quantityCell = document.createElement('td');
+                quantityCell.textContent = item.itemsQuantity;
+                row.appendChild(quantityCell);
+
+                const actionCell = document.createElement('td');
+                const removeButton = document.createElement('button');
+                removeButton.textContent = 'Remove';
+                removeButton.classList.add('remove-btn');
+                removeButton.addEventListener('click', () => removeMenuItem(item.itemname));
+                actionCell.appendChild(removeButton);
+                row.appendChild(actionCell);
+
+                menuList.appendChild(row);
+            });
+        }
+
+
+        function removeMenuItem(itemName) {
+            pool.promise().execute('DELETE FROM items WHERE itemname = ? AND type = "quick_menu"', [itemName])
+                .then(() => {
+                    fetchAndDisplayMenuItems(); // Refresh the list after removal
+                })
+                .catch(error => {
+                    console.error('Error removing item:', error);
+                    alert('Error removing item.');
+                });
+        }
+
+        function addItem(event) {
+    event.preventDefault();
+    const itemName = document.getElementById('itemName').value.trim();
+    const itemPrice = parseFloat(document.getElementById('itemPrice').value);
+    const itemQuantity = parseInt(document.getElementById('itemQuantity').value);
+    const pricePerItem = parseFloat(document.getElementById('pricePerItem').value);
+
+    if (!itemName || isNaN(itemPrice) || itemPrice <= 0 || isNaN(itemQuantity) || itemQuantity <= 0 || isNaN(pricePerItem) || pricePerItem <= 0) {
+        alert('Please enter valid item details.');
+        return;
+    }
+
+    const query = `
+        INSERT INTO items (itemname, sellprice, itemsQuantity, pricePerItem, type)
+        VALUES (?, ?, ?, ?, 'quick_menu')
+        ON DUPLICATE KEY UPDATE
+            sellprice = VALUES(sellprice),
+            itemsQuantity = VALUES(itemsQuantity),
+            pricePerItem = VALUES(pricePerItem)
+    `;
+
+    pool.promise().execute(query, [itemName, itemPrice, itemQuantity, pricePerItem])
+        .then(() => {
+            fetchAndDisplayMenuItems(); // Refresh the list after adding
+            clearForm(); // Clear the form fields after successful addition
+        })
+        .catch(error => {
+            console.error('Error adding/updating item in quick menu:', error);
+            alert('Error adding/updating the item.');
+        });
+}
+
+
+        function goBack() {
+            window.location.href = "Home.html";
+        }
+
+        document.getElementById('addItemButton').addEventListener('click', addItem);
+        document.getElementById('addItemForm').addEventListener('submit', addItem); // Handle form submission
+
+        fetchAndDisplayMenuItems(); // Initial fetch of the menu items
+        function clearForm() {
+    document.getElementById('itemName').value = '';
+    document.getElementById('itemPrice').value = '';
+    document.getElementById('itemQuantity').value = '';
+    document.getElementById('pricePerItem').value = '';
+}
+
+    </script>
+</body>
+
+</html>

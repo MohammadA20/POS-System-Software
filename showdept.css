@@ -1,0 +1,74 @@
+/* showdept.css */
+
+/* Total Debts */
+#totalDebts {
+    font-weight: bold;
+    color: #4CAF50; /* Green color */
+    font-size: 18px;
+}
+
+/* Search input field */
+#nameSearch {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 300px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s ease;
+}
+
+#nameSearch:focus {
+    outline: none;
+    border-color: #4CAF50; /* Green color */
+}
+
+/* Container styles */
+.container {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+}
+
+th {
+    background-color: #f2f2f2;
+    color: #333;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f0f0f0;
+}
+
+.back {
+    margin-top: 15px;
+    margin-left: 15px;
+    font-size: 20px;
+    background-color: transparent;
+    color: #333;
+    border: none;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.back:hover {
+    color: #4CAF50; /* Green color */
+}

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>نموذج</title>
+    <link rel="stylesheet" href="dept.css" />
+</head>
+
+<body style="font-size: larger; font-weight: bold">
+<button
+onclick="navigateToHomePage()">
+    Go to Sell
+</button>
+
+    <button class="cssbuttons-io-button" onclick="navigateToshowDept()" style="float: right; margin-top: 15px; margin-right: 15px;">
+        عرض السجل
+        <div class="icon">
+            <svg
+                height="24"
+                width="24"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <path d="M0 0h24v24H0z" fill="none"></path>
+                <path
+                    d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z"
+                    fill="currentColor"
+                ></path>
+            </svg>
+        </div>
+    </button>
+
+    <form id="deptForm">
+
+ 
+
+        <input type="text" id="name" name="name" autocomplete="off" required placeholder=" name /الاسم" />
+  
+
+        <input type="text" id="living" name="living" placeholder="City / السكن" value="" />
+
+        <input type="text" id="phone" name="phone" placeholder="phone number / رقم الهاتف" /><br />
+
+        <input type="number" id="amount" name="amount" required placeholder="amount / المبلغ" />
+
+        <input type="number" id="paid" name="paid" required placeholder="amount recived / المدفوع" />
+
+        <select id="unit" name="unit">
+            <option value="$">الدولار ($)</option>
+            <option value="LBP">الليرة اللبنانية (LBP)</option>
+        </select>
+
+        <input type="text" id="item" name="item" placeholder="note / ملاحظة" /><br />
+
+        <!-- New date input field -->
+        <input type="date" id="date" name="date" required placeholder="التاريخ" /><br />
+        <span id="selectedDate"></span><br /> <!-- Display selected date -->
+
+        <button type="submit">إرسال</button>
+    </form>
+
+    <script>
+        const { ipcRenderer } = require("electron");
+
+        document.getElementById("deptForm").addEventListener("submit", (event) => {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+            const paid = parseFloat(formData.get("paid"));
+            const amount = parseFloat(formData.get("amount"));
+            const remain = amount - paid;
+
+            const deptData = {
+                name: formData.get("name"),
+                living: formData.get("living"),
+                phone: formData.get("phone"),
+                amount: amount,
+                paid: paid,
+                remain: remain,
+                item: formData.get("item"),
+                unit: formData.get("unit"),
+                date: formData.get("date") // Include the date field in the form data
+            };
+
+            ipcRenderer.send("submitDeptForm", deptData);
+
+            event.target.reset();
+            document.getElementById("selectedDate").textContent = ""; // Clear selected date after form submission
+        });
+
+        document.getElementById("date").addEventListener("change", (event) => {
+            const selectedDate = event.target.value;
+            document.getElementById("selectedDate").textContent = "التاريخ: " + selectedDate; // Display selected date
+        });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const nameInput = document.getElementById("name");
+            const suggestionContainer = document.getElementById("suggestionContainer");
+
+            ipcRenderer.send("fetchNames");
+            ipcRenderer.on("namesFetched", (event, names) => {
+                nameInput.addEventListener("input", () => {
+                    const searchText = nameInput.value.toLowerCase();
+                    const suggestions = names.filter((name) => name.toLowerCase().includes(searchText));
+
+                    displaySuggestions(suggestions);
+                });
+            });
+
+            function displaySuggestions(suggestions) {
+                if (suggestions.length === 0) {
+                    suggestionContainer.style.display = "none";
+                    return;
+                }
+                const suggestionHTML = suggestions.map((name) => `<div class="suggestion-panel">${name}</div>`).join("");
+                suggestionContainer.innerHTML = suggestionHTML;
+                suggestionContainer.style.display = "block";
+            }
+
+            suggestionContainer.addEventListener("click", (event) => {
+                if (event.target.classList.contains("suggestion-panel")) {
+                    nameInput.value = event.target.textContent;
+                    suggestionContainer.style.display = "none";
+                }
+            });
+
+            document.addEventListener("click", (event) => {
+                if (!event.target.matches("#name")) {
+                    suggestionContainer.style.display = "none";
+                }
+            });
+
+            document.addEventListener("keydown", (event) => {
+                if (event.key === "Escape") {
+                    suggestionContainer.style.display = "none";
+                }
+            });
+        });
+
+        function navigateToHomePage() {
+            console.log("Navigating");
+            window.location.href = "ESell.html";
+        }
+
+        function navigateToshowDept() {
+            console.log("Navigating");
+            window.location.href = "Eshowdept.html";
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const customerNameSelect = document.getElementById("customerName");
+            const nameSearchInput = document.getElementById("nameSearch");
+
+            // Fetch names and populate select element
+            ipcRenderer.send("fetchNames");
+            ipcRenderer.on("namesFetched", (event, names) => {
+                populateCustomerNames(names);
+            });
+
+            // Function to populate customer names in select element
+            function populateCustomerNames(names) {
+                customerNameSelect.innerHTML = "";
+                names.forEach(name => {
+                    const option = document.createElement("option");
+                    option.value = name;
+                    option.textContent = name;
+                    customerNameSelect.appendChild(option);
+                });
+            }
+
+            // Event listener for search input
+            nameSearchInput.addEventListener("input", () => {
+                const searchText = nameSearchInput.value.trim().toLowerCase();
+                const options = customerNameSelect.options;
+
+                for (let i = 0; i < options.length; i++) {
+                    const optionText = options[i].textContent.toLowerCase();
+                    if (optionText.includes(searchText)) {
+                        options[i].style.display = "";
+                    } else {
+                        options[i].style.display = "none";
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

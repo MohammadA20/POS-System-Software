@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Department</title>
+    <link rel="stylesheet" href="editDept.css"> <!-- Add your CSS file here -->
+</head>
+
+<body>
+    <button class="back" onclick="goBack()">
+        🔙
+    </button>
+    <h1>Edit Dept</h1>
+
+    <div id="editDeptFormContainer">
+        <!-- Department data will be rendered here -->
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        // Get the customer ID from the URL query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const customerId = urlParams.get('id');
+
+        // Send a request to the main process to fetch all department data for the given ID
+        ipcRenderer.send('fetchDeptById', customerId);
+
+        // Listen for the response with the department data
+        ipcRenderer.on('deptById', (event, deptData) => {
+            // Populate the edit form with the department data
+            const editDeptFormContainer = document.getElementById('editDeptFormContainer');
+            deptData.forEach((dept) => {
+                const form = createEditForm(dept);
+                editDeptFormContainer.appendChild(form);
+            });
+        });
+
+        // Function to create and populate an edit form for a department
+        function createEditForm(dept) {
+            const form = document.createElement('form');
+            form.classList.add('editDeptForm');
+
+            const fields = ['name', 'living', 'phone', 'amount', 'paid', 'remain', 'item', 'unit'];
+
+            fields.forEach((field) => {
+                const div = document.createElement('div');
+                const label = document.createElement('label');
+                label.setAttribute('for', field);
+                label.textContent = field.charAt(0).toUpperCase() + field.slice(1) + ':';
+                const input = document.createElement('input');
+                input.setAttribute('type', 'text');
+                input.setAttribute('id', field);
+                input.setAttribute('name', field);
+                input.setAttribute('value', dept[field]);
+                div.appendChild(label);
+                div.appendChild(input);
+                form.appendChild(div);
+            });
+
+            const submitButton = document.createElement('button');
+            submitButton.setAttribute('type', 'submit');
+            submitButton.textContent = 'Save Changes';
+            form.appendChild(submitButton);
+
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+
+                const updatedDeptData = {
+                    id: dept.id,
+                    name: form.querySelector('#name').value,
+                    living: form.querySelector('#living').value,
+                    phone: form.querySelector('#phone').value,
+                    amount: form.querySelector('#amount').value,
+                    paid: form.querySelector('#paid').value,
+                    remain: form.querySelector('#remain').value,
+                    item: form.querySelector('#item').value,
+                    unit: form.querySelector('#unit').value
+                };
+
+                // Send the updated department data to the main process for updating in the database
+                ipcRenderer.send('updateDeptData', updatedDeptData);
+            });
+
+            return form;
+        }
+
+        function goBack() {
+            console.log("الانتقال الى الصفحة الرئيسية");
+            window.location.href = "showdepts.html";
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الأقسام</title>
+    <link rel="stylesheet" href="showdept.css">
+</head>
+
+<body>
+    <button class="back" onclick="goBack()">
+        🔙
+    </button>
+    <input type="text" id="nameSearch" placeholder="Search by name or phone number" oninput="searchDebtName()">
+
+    <div>Total Debts: <span id="totalDebts">0</span></div>
+
+    <div class="container">
+        <h2>حسابات العملاء</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Customer Name / اسم العميل</th>
+                    <th> id/ الرقم التعريفي </th>
+                    <th>City / السكن</th>
+                    <th> Phone Number / رقم الهاتف</th>
+                    <th> Borrowed Amount / المبلغ الاساسي </th>
+                    <th> Payed / المدفوع</th>
+                    <th> remain / المتبقي</th>
+                    <th> Note : ملاحظة </th>
+                    <th style="width: 80px;"> Currency/ العملة </th>
+                    <th> Date /التاريخ</th> <!-- Date column added -->
+                    <th> Edit / تعديل </th>
+                </tr>
+            </thead>
+            <tbody id="customerData">
+                <!-- Customer data rows will be rendered here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        ipcRenderer.on('deptData', (event, depts) => {
+            const customerData = document.getElementById('customerData');
+            customerData.innerHTML = '';
+
+            if (depts.length === 0) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = `<td colspan="11">No data available</td>`;
+                customerData.appendChild(emptyRow);
+                return;
+            }
+
+            depts.forEach((dept) => {
+                const deptRow = document.createElement('tr');
+                // Format the date
+                const formattedDate = formatDate(dept.date);
+                // Calculate the remaining amount
+                const remain = dept.amount - dept.paid;
+
+                deptRow.innerHTML = `
+                    <td>${dept.name}</td>
+                    <td>${dept.id}</td>
+                    <td>${dept.living}</td>
+                    <td>${dept.phone_number}</td>
+                    <td>${dept.amount}</td>
+                    <td>${dept.paid}</td>
+                    <td>${remain.toFixed(2)}</td>
+                    <td>${dept.name_of_item}</td>
+                    <td>${dept.unit}</td>
+                    <td>${formattedDate}</td>
+                    <td><button class="edit-button" data-id="${dept.id}">Edit</button></td>
+                `;
+                customerData.appendChild(deptRow);
+            });
+
+            // Call the function to calculate and display total debts
+            calculateTotalDebts();
+
+            // Add event listener to the Edit buttons
+            const editButtons = document.querySelectorAll('.edit-button');
+            editButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    const deptId = button.dataset.id;
+                    // Redirect to edit page with department ID
+                    window.location.href = `editDept.html?id=${deptId}`;
+                });
+            });
+        });
+
+        ipcRenderer.on('deptDataError', (event, errorMessage) => {
+            console.error('Error fetching department data:', errorMessage);
+            // Handle error display as needed
+        });
+
+        // Request department data from main process
+        ipcRenderer.send('fetchDeptData');
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function calculateTotalDebts() {
+            const rows = document.querySelectorAll('#customerData tr');
+            let totalDebts = 0;
+
+            rows.forEach(row => {
+                const remainCell = row.querySelector('td:nth-child(7)');
+                totalDebts += parseFloat(remainCell.textContent);
+            });
+
+            document.getElementById('totalDebts').textContent = totalDebts.toFixed(2);
+        }
+
+        function searchDebtName() {
+            const input = document.getElementById('nameSearch').value.trim().toLowerCase();
+            const rows = document.querySelectorAll('#customerData tr');
+
+            rows.forEach(row => {
+                const name = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+                const phoneNumber = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+                if (name.includes(input) || phoneNumber.includes(input)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function goBack() {
+            console.log("الانتقال الى الصفحة الرئيسية");
+            window.location.href = "Home.html";
+        }
+    </script>
+
+</body>
+
+</html>

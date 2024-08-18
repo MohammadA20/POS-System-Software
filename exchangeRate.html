@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exchange Rate</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            max-width: 400px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .container h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .container label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #555;
+        }
+
+        .container input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .container button {
+            padding: 12px 30px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .container button:hover {
+            background-color: #0056b3;
+        }
+
+        .back {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(255, 0, 0, 0.582);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            padding: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 999;
+        }
+    </style>
+</head>
+
+<body>
+    <button onclick="goBack()" class="back">🔙</button>
+    <div class="container">
+       
+        <h1>Exchange Rate / سعر الصرف</h1>
+        <label for="exchangeRate">Enter Exchange Rate / ادخل سعر الصرف </label>
+        <input type="number" id="exchangeRate" step="0.01">
+        <button onclick="saveExchangeRate()">Save</button>
+    </div>
+
+    <script>
+        const fs = require('fs');
+
+        function saveExchangeRate() {
+    const exchangeRateInput = document.getElementById('exchangeRate');
+    const exchangeRate = exchangeRateInput.value;
+    const exchangeRateObj = { "exchange_rate": exchangeRate };
+    const jsonString = JSON.stringify(exchangeRateObj);
+
+    // Reset input field after saving
+    exchangeRateInput.value = "";
+
+    fs.writeFile('rate.json', jsonString, 'utf8', (err) => {
+        if (err) {
+            alert('Failed to save exchange rate');
+            console.error('Error writing file:', err);
+            return;
+        }
+
+    });
+    exchangeRate.value = "";
+}
+function goBack() {
+    console.log("Navigating back to Home.html");
+    window.location.href = "Home.html";
+
+}
+
+
+</script>
+</body>
+
+</html>

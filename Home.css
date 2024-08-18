@@ -1,0 +1,194 @@
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  direction: rtl;
+  user-select: none;
+  background-color: #ffffff;
+  overflow-x: hidden;
+}
+
+header {
+  background-color: #333;
+  color: #fff;
+  padding: 3px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.logo {
+  width: 100px;
+}
+
+.contact-info {
+  
+  font-size: 25px;
+}
+
+#particles-js {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+main {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  animation: mainFadeIn 1s ease-in-out;
+}
+
+@keyframes mainFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.section {
+  background-color: #f0f0f0;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+.section:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.section h2 {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #0074d9;
+  margin-bottom: 1rem;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+button {
+  width: 150px;
+  height: 150px;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid black;
+  border-radius: 50%;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  transition: background-color 0.3s, transform 0.3s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+  background-color: #005ea8;
+  animation: buttonFade 0.5s infinite alternate;
+  transform: translateY(-2px);
+}
+
+footer {
+  text-align: center;
+  padding: 2rem;
+  background-color: #333;
+  color: #fff;
+  clear: both;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  animation: footerSlideIn 1s ease-in-out;
+}
+
+@keyframes footerSlideIn {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes buttonFade {
+  from {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+#sellButton {
+  background-image: url("icons/Sell.jpg");
+}
+
+#inventoryButton {
+  background-image: url("icons/inventory.jpg");
+}
+
+#addnew {
+  background-image: url("icons/addnew.jpg");
+}
+
+#editqk {
+  background-image: url("icons/quickmenu.jpg");
+}
+
+#expiredate {
+  background-image: url("icons/expiredate.jpg");
+}
+
+#salesReportButton {
+  background-image: url("icons/salereport.jpg");
+}
+
+#deptid {
+  background-image: url("icons/dept.jpg");
+}
+
+#chartid {
+  background-image: url("icons/chart.jpg");
+}
+
+#xrated {
+  background-image: url("icons/exchange.jpg");
+}
+
+#manageid {
+  background-image: url("icons/manageemployee.jpg");
+}
+#tpsale {
+  background-image: url("icons/topsales.jpg");
+}
+
+
+#manageid {
+  text-shadow: 10px 10px 10px rgba(0, 0, 0, 0.5);
+}

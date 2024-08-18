@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title> POS Sell</title>
+    <link rel="stylesheet" href="Style.CSS" />
+    <style>
+        body {
+            font-family: "Arial", sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="particles-js"></div>
+    <main>
+        <section class="section2">
+            <button class="back" onclick="goToDept()">🔙</button>
+
+            <fieldset>
+                <input type="text" id="barcodeInput" name="barcodeInput" oninput="addToCart('barcode')"
+                    placeholder="Search here" style="width: 90%" />
+            </fieldset>
+
+            <fieldset>
+                <button id="PrintButton" onclick="printInvoice()" style="width: 100%; margin-top: 5px">
+                    طباعة الفاتورة / Print
+                </button>
+            </fieldset>
+            <form id="sellForm"></form>
+
+            <fieldset>
+                <button id="checkoutButton" onclick="checkout()" style="width: 100%; margin-top: 5px">
+                    Confirm / تاكيد
+                </button>
+
+                <input type="text" id="creditCardInput" placeholder="Enter 12-digit Card Number"
+                    style="width: 88%; margin-top: 5px" />
+                <div id="CardAlert"></div>
+
+                <div>
+                    <input type="radio" id="cash" name="paymentMethod" value="cash" checked />
+                    <label for="cash">Cash / نقدا</label>
+                </div>
+                <div>
+                    <input type="radio" id="card" name="paymentMethod" value="card" />
+                    <label for="card">Credit Card</label>
+                </div>
+            </fieldset>
+            <input type="text" id="xrate" readonly style="background-color: transparent; border: none" />
+
+            <input type="text" id="nameInput" name="nameInput" oninput="fetchProductInfo('name')"
+                style="width: 1px; outline: none; border: none" />
+        </section>
+
+        <section>
+            <div class="CartBar">
+                <div class="center">
+                    <h2>
+                        <table style="width: 300px">
+                            <tr>
+                                <th>
+                                    <p style="font-size: 16px">
+                                        Total / المجموع: $<span id="totalAmount">0.00</span>
+                                    </p>
+                                </th>
+                                <th>
+                                    <p style="font-size: 16px">
+                                        أو: <span id="lbrate">0.00</span> LBP
+                                    </p>
+                                </th>
+                            </tr>
+                        </table>
+                    </h2>
+                </div>
+
+                <div class="right">
+                    <button id="holdButton" onclick="holdCart()"> الانتظار /Hold</button>
+                    <button onclick="restoreHeldCart()">استعادة / Restore</button>
+                </div>
+            </div>
+
+            <table id="shoppingCart" style="width: 800px">
+                <thead>
+                    <th>اسم المنتج <br> Item Name</th>
+                    <th>الكمية <br> Quantity</th>
+                    <th>السعر <br> Price</th>
+                    <th>المجموع <br> Total</th>
+                    <th>الإجراء <br> Action</th>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
+    </main>
+
+    <section class="quickMenu" style="margin-top: 60px">
+        <fieldset>
+            <legend>Quick Menu / القائمة السريعة</legend>
+            <div id="quickMenuItems"></div>
+        </fieldset>
+    </section>
+
+    <footer></footer>
+    <script src="Sell.js"></script>
+    <script></script>
+    <script src="readRate.js"></script>
+    <script>
+        var x = 0;
+        readExchangeRate((err, exchangeRate) => {
+            if (err) {
+                console.error("Error reading exchange rate:", err);
+                return;
+            }
+            console.log("Exchange rate:", exchangeRate);
+            document.getElementById("xrate").value = "  سعر الصرف :";
+            document.getElementById("xrate").value += exchangeRate;
+            x = exchangeRate;
+
+            const targetElement = document.getElementById("totalAmount");
+            const inputElement = document.getElementById("lbrate");
+
+            const observer = new MutationObserver((mutationsList, observer) => {
+                for (let mutation of mutationsList) {
+                    if (
+                        mutation.type === "childList" &&
+                        mutation.target === targetElement
+                    ) {
+                        const updatedValue = mutation.target.textContent;
+
+                        inputElement.textContent = (updatedValue * x).toFixed(0);
+
+                        console.log("Updated total amount:", updatedValue);
+                    }
+                }
+            });
+
+            const observerOptions = {
+                childList: true,
+            };
+
+            observer.observe(targetElement, observerOptions);
+        });
+
+        document
+            .getElementById("nameInput")
+            .addEventListener("keypress", function (event) {
+                if (event.key === "Enter") {
+                    event.preventDefault(); // Prevent the default form submission behavior
+                    addToCart("name");
+                }
+            });
+
+            function printInvoice() {
+    const cartTable = document.getElementById("shoppingCart");
+    const totalAmount = calculateTotalAmount(cartTable);
+
+    const printTable = document.createElement("table");
+
+    const headerRow = document.createElement("tr");
+    const headerCells = cartTable.querySelectorAll("thead th");
+    headerCells.forEach((th, index) => {
+        if (index !== headerCells.length - 1) {
+            const newTh = document.createElement("th");
+            newTh.textContent = th.textContent;
+            headerRow.appendChild(newTh);
+        }
+    });
+    const printTableHead = document.createElement("thead");
+    printTableHead.appendChild(headerRow);
+    printTable.appendChild(printTableHead);
+
+    const printTableBody = document.createElement("tbody");
+    cartTable.querySelectorAll("tbody tr").forEach((row) => {
+        const newRow = document.createElement("tr");
+        const cells = row.querySelectorAll("td");
+        for (let i = 0; i < cells.length - 1; i++) {
+            const td = cells[i];
+            const newTd = document.createElement("td");
+            const input = td.querySelector("input");
+            if (input) {
+                if (i === 2) {
+                    // Price column
+                    const price = parseFloat(input.value);
+                    const quantity = parseFloat(cells[1].querySelector("input").value);
+                    const totalPrice = price * quantity;
+                    const totalPriceInLBP = (totalPrice * x).toFixed(0);
+                    newTd.textContent = `${price.toFixed(2)} (${totalPriceInLBP} LBP)`;
+                } else {
+                    newTd.textContent = input.value;
+                }
+            }
+            else {
+                // Include other columns
+                newTd.textContent = td.textContent;
+            }
+            newRow.appendChild(newTd);
+        }
+        printTableBody.appendChild(newRow);
+    });
+    printTable.appendChild(printTableBody);
+
+    const printWindow = window.open("", "_blank");
+
+    printWindow.document.open();
+    printWindow.document.write(`
+        <html>
+        <head>
+            <div class="shiftdiv">Tech Spot System</div>
+            <div class="shiftdivt"></div>
+            <style>
+                .shiftdiv {
+                    margin-left: 70px;
+                    font-size: 20px;
+                }
+                .shiftdivt {
+                    margin-left: 90px;
+                    font-size: 20px;
+                }
+                body {
+                    font-family: Arial, sans-serif;
+                    width: 80mm;
+                    margin: 0;
+                    padding: 0;
+                }
+                .invoice-header {
+                    text-align: left;
+                    margin-bottom: 2mm;
+                }
+                table {
+                    border-collapse: collapse;
+                    font-size: 19px;
+                    width: 80mm;
+                }
+                th, td {
+                    border: 1px solid #dddddd;
+                    text-align: center;
+                    padding: 1px;
+                    word-wrap: break-word;
+                }
+                th:nth-child(1), td:nth-child(1) {
+                    width: 40%;
+                }
+                th:nth-child(2), td:nth-child(2) {
+                    width: 20%;
+                }
+                th:nth-child(3), td:nth-child(3) {
+                    width: 20%;
+                }
+                th {
+                    background-color: #f2f2f2;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="invoice-header">
+                <div class="shiftdivt">
+                    $<span id="printTotalAmount">${totalAmount}</span>
+                    <br>
+                    ليرة: <span id="lbrate">${(totalAmount * x).toFixed(0)}</span>
+                </div>
+            </div>
+            ${printTable.outerHTML}
+        </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.print();
+}
+
+function calculateTotalAmount(cartTable) {
+    let totalAmount = 0;
+    cartTable.querySelectorAll("tbody tr").forEach(row => {
+        const cells = row.querySelectorAll("td");
+        const price = parseFloat(cells[2].querySelector("input").value);
+        const quantity = parseFloat(cells[1].querySelector("input").value);
+        const totalPrice = price * quantity;
+        totalAmount += totalPrice;
+    });
+    return totalAmount.toFixed(2);
+}
+
+
+
+
+        ipcRenderer.on("last-node-value", (event, lastNodeValue) => {
+            console.log("Last node value:", lastNodeValue);
+            const barcodeInput = document.getElementById("barcodeInput");
+            if (barcodeInput) {
+                addToCart(lastNodeValue);
+            }
+        });
+    </script>
+</body>
+
+</html>

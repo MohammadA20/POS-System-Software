@@ -1,0 +1,40 @@
+{
+  "name": "pos",
+  "version": "1.0.0",
+  "author": "Sana Nassan & Mhmad Adada",
+  "description": "Your Electron application description",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.3",
+    "firebase": "^10.10.0",
+    "firebase-admin": "^12.0.0",
+    "i18next": "^23.11.5",
+    "i18next-electron-fs-backend": "^3.0.1",
+    "mysql2": "3.6.5",
+    "react-i18next": "^14.1.2"
+  },
+  "devDependencies": {
+    "electron": "^16.0.0",
+    "electron-builder": "^22.10.5"
+  },
+  "build": {
+    "appId": "com.TSS-POS.QK",
+    "productName": "TSS POS",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "icon": "logo.png"
+    },
+    "mac": {
+      "icon": "logo.png"
+    },
+    "linux": {
+      "icon": "logo.png"
+    }
+  }
+}

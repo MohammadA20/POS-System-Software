@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expiring Items Notification</title>
+  <link rel="stylesheet" href="notification.css">
+  <button onclick="goBack()">Home Page</button>
+</head>
+<body>
+  <select id="filter-options" onchange="filterItems()">
+    <option value="all">Show All Items / عرض جميع المنتجات</option>
+    <option value="expired">Show Expired Items / عرض منتجات منتهية الصلاحية</option>
+  </select>
+  <h1>Expiring Items</h1>
+  <table id="expiring-items-table">
+    <thead>
+      <tr>
+        <th>Item / المنتج</th>
+        <th>Expiration Date / ينتهي بعد </th>
+        <th>Expire Date / تاريخ الانتهاء</th> 
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+
+    ipcRenderer.on('expiring-items-data', (event, expiringItems) => {
+      const expiringItemsTable = document.getElementById('expiring-items-table').getElementsByTagName('tbody')[0];
+      expiringItemsTable.innerHTML = '';
+      const currentDate = new Date();
+
+      expiringItems.forEach(item => {
+        const expirationDate = new Date(item.expire_date);
+        const row = expiringItemsTable.insertRow();
+        const itemNameCell = row.insertCell(0);
+        const expirationDateCell = row.insertCell(1);
+        const expireDateCell = row.insertCell(2); // Insert new cell for expiration date
+
+        itemNameCell.textContent = item.itemName;
+
+        const daysUntilExpiration = Math.ceil((expirationDate - currentDate) / (1000 * 60 * 60 * 24));
+        if (expirationDate < currentDate) {
+          expirationDateCell.style.color = 'red'; // Mark expired date in red
+          expirationDateCell.textContent = 'Expired';
+        } else {
+          expirationDateCell.textContent = daysUntilExpiration + ' days remaining';
+        }
+
+        expireDateCell.textContent = expirationDate.toLocaleDateString(); // Display expiration date in new column
+      });
+    });
+
+    // Request expiring items data when the page loads
+    ipcRenderer.send('fetch-expiring-items');
+
+    function goBack() {
+      console.log("Navigating to Home Page");
+      window.location.href = "Home.html";
+    }
+
+    function filterItems() {
+      const filterOption = document.getElementById('filter-options').value;
+      const expiringItemsTable = document.getElementById('expiring-items-table');
+      const tbody = expiringItemsTable.getElementsByTagName('tbody')[0];
+      const rows = tbody.getElementsByTagName('tr');
+      const expiredRows = [];
+      const nonExpiredRows = [];
+
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const expirationCell = row.getElementsByTagName('td')[1]; // Assuming the expiration date cell is the second cell in each row
+        const isExpired = expirationCell.textContent.trim() === 'Expired';
+
+        switch (filterOption) {
+          case 'all':
+            row.style.display = ''; // Show all items
+            break;
+          case 'expired':
+            row.style.display = isExpired ? '' : 'none'; // Show only expired items
+            break;
+          case 'expired-top':
+            if (isExpired) {
+              expiredRows.push(row);
+            } else {
+              nonExpiredRows.push(row);
+            }
+            break;
+          default:
+            break;
+        }
+      }
+
+      if (filterOption === 'expired-top') {
+        tbody.innerHTML = ''; // Clear the table body
+        expiredRows.forEach(row => tbody.appendChild(row));
+        nonExpiredRows.forEach(row => tbody.appendChild(row));
+      }
+    }
+  </script>
+</body>
+</html>

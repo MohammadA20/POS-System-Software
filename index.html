@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login</title>
+  <link rel="stylesheet" href="login.css" />
+</head>
+
+<body>
+  <div class="header">
+    <div class="image-container">
+      <img src="icons/Sellpng.png" alt="Image 1" />
+      <img src="icons/customer.png" alt="Image 2" />
+      <img src="icons/inventorymanage.png" alt="Image 3" />
+      <img src="icons/manage.png" alt="Image 4" />
+    </div>
+  </div>
+
+  <div class="login-container">
+    <h2>Tech Spot System</h2>
+    <form class="login-form" action="" method="post">
+      <div class="form-group">
+        <input type="text" id="username" name="username" required placeholder="Enter Your Username" />
+      </div>
+      <div class="form-group">
+        <input type="password" id="password" name="password" required placeholder="Enter Your Password" />
+      </div>
+      <div class="form-group">
+        <button type="submit">Login</button>
+      </div>
+      <div class="error-message" style="display: none; color: red;">
+        Incorrect username or password. Please try again.
+      </div>
+    </form>
+  </div>
+  <script>
+    const { ipcRenderer } = require("electron");
+    document.querySelector(".login-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        try {
+          const result = await ipcRenderer.invoke("login-attempt", {
+            email: username,
+            password,
+          });
+          if (result.success) {
+            console.log("Login successful:", result.user);
+            if (result.user.type === "admin") {
+              window.location.href = "Home.html";
+            } else if (result.user.type === "employee") {
+              window.location.href = "ESell.html"; 
+            }
+          } else {
+            console.error("Login failed:", result.error);
+            document.querySelector(".error-message").style.display = "block";
+          }
+        } catch (error) {
+          console.error("Error during IPC:", error);
+        }
+     
+
+      });
+
+  </script>
+  <script src="main.js"></script>
+</body>
+
+</html>

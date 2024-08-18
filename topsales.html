@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top Sales Items / الاكثر مبيعا</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        table th,
+        table td {
+            padding: 15px;
+            border: 1px solid #ced4da;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+
+        table tr:hover {
+            background-color: #f1f1f1;
+        }
+
+
+        @media (max-width: 600px) {
+
+            table,
+            thead,
+            tbody,
+            th,
+            td,
+            tr {
+                display: block;
+            }
+
+            table th {
+                display: none;
+            }
+
+            table td {
+                position: relative;
+                padding-left: 50%;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+            }
+
+            table td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 10px;
+                width: calc(50% - 20px);
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                font-weight: bold;
+            }
+        }
+
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="backArrow" onclick="goBack()" class="back-button">
+        <svg width="24" height="24" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M20 11H7.41l3.29-3.29L10 6l-6 6 6 6 1.41-1.41L7.41 13H20v-2z" />
+        </svg>
+    </div>
+
+    <h1>Top Sales / الاكثر مبيعا</h1>
+    <table id="top-sales-table">
+        <thead>
+            <tr>
+                <th>Item Name / اسم المنتج</th>
+                <th>Total Quantity / الكمية</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be populated by JavaScript -->
+        </tbody>
+    </table>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        window.onload = () => {
+            ipcRenderer.send("fetch-top-sales-items");
+        };
+
+        ipcRenderer.on("top-sales-items", (event, topSalesItems) => {
+            displayTopSalesItems(topSalesItems);
+        });
+
+        ipcRenderer.on("top-sales-items-error", (event, error) => {
+            console.error("Error message from main process:", error);
+        });
+
+        function displayTopSalesItems(topSalesItems) {
+            const topSalesTableBody = document.querySelector('#top-sales-table tbody');
+            topSalesTableBody.innerHTML = '';
+
+            topSalesItems.forEach(item => {
+                const row = document.createElement('tr');
+
+                const itemNameCell = document.createElement('td');
+                itemNameCell.textContent = item.itemName;
+                itemNameCell.setAttribute('data-label', 'Item Name');
+
+                const itemQuantityCell = document.createElement('td');
+                itemQuantityCell.textContent = item.totalQuantity;
+                itemQuantityCell.setAttribute('data-label', 'Total Quantity');
+
+                row.appendChild(itemNameCell);
+                row.appendChild(itemQuantityCell);
+
+                topSalesTableBody.appendChild(row);
+            });
+        }
+
+        function goBack() {
+            console.log("Navigating back");
+            window.location.href = "Home.html";
+        }
+    </script>
+</body>
+
+</html>

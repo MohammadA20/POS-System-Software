@@ -1,0 +1,139 @@
+/* In notification.css */
+
+/* General styling */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  color: #333;
+  text-align: center;
+}
+
+/* Table styling */
+#expiring-items-table {
+  width: 80%;
+  margin: 20px auto;
+  border-collapse: collapse;
+}
+
+#expiring-items-table th,
+#expiring-items-table td {
+  padding: 15px;
+  text-align: center;
+  border: 1px solid #ccc;
+}
+
+#expiring-items-table th {
+  background-color: #333;
+  color: white;
+}
+
+#expiring-items-table tbody tr {
+  transition: background-color 0.3s; /* Smooth transition */
+}
+
+#expiring-items-table tbody tr:hover {
+  background-color: #e0e0e0; /* Change background color on hover */
+}
+
+#expiring-items-table tbody tr.expired td {
+  color: red;
+}
+
+#expiring-items-table tbody tr.expired td:first-child {
+  border-left-color: red;
+}
+
+#expiring-items-table tbody tr.expired td:last-child {
+  border-right-color: red;
+}
+
+/* Remaining items styling */
+#expiring-items-table tbody tr.non-expired {
+  color: #333; /* Default color for non-expired items */
+}
+
+#expiring-items-table tbody tr.non-expired td:first-child {
+  border-left-color: #ccc; /* Default border color for non-expired items */
+}
+
+#expiring-items-table tbody tr.non-expired td:last-child {
+  border-right-color: #ccc; /* Default border color for non-expired items */
+}
+/* In notification.css */
+
+/* Home button styling */
+button {
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+button:hover {
+  background-color: #555;
+}
+
+/* Select element styling */
+select {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+/* Styling for select arrow */
+select::-ms-expand {
+  display: none;
+}
+
+select::-webkit-inner-spin-button,
+select::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* In another.css */
+
+/* Home button styling */
+button {
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+button:hover {
+  background-color: #555;
+}
+
+/* Select element styling */
+select {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+/* Styling for select arrow */
+select::-ms-expand {
+  display: none;
+}
+
+select::-webkit-inner-spin-button,
+select::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

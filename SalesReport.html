@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>نظام نقطة البيع - تقرير المبيعات</title>
+  <link rel="stylesheet" href="SalesReport.css">
+  <style>
+
+
+
+  </style>
+</head>
+
+<body>
+  <header>
+    <div id="backArrow" onclick="goBack()" class="back-button">
+      <svg width="24" height="24" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M20 11H7.41l3.29-3.29L10 6l-6 6 6 6 1.41-1.41L7.41 13H20v-2z" />
+      
+      </svg>
+     
+    </div>
+
+    <h2>تقرير المبيعات</h2>
+    <div id="filterMenu" dir="rtl">
+      <fieldset>
+        <legend>Filter by date / تصفية حسب التاريخ</legend>
+        <select id="yearFilter" onchange="handleFilterChange()">
+          <option value="">السنة</option>
+        </select>
+        <select id="monthFilter" onchange="handleFilterChange()">
+          <option value="">الشهر</option>
+        </select>
+        <select id="dayFilter" onchange="handleFilterChange()">
+          <option value="">اليوم</option>
+        </select>
+        <button onclick="resetFilters()">Reset Filter / إعادة تعيين التصفية</button>
+      </fieldset>
+      <fieldset>
+        <legend>Search / البحث</legend>
+        <input type="text" id="searchBar" class="search" placeholder="البحث...">
+        <button onclick="handleFilterChange()" class="searchbtn">Search</button>
+      </fieldset>
+      <fieldset>
+        <legend>  مجموع الربح / Total Profit</legend>
+        <button id="totalProfit" class="profit">$0.00</button>
+        <button id="totalProfitInLBP" class="profit">0 LBP</button>
+      </fieldset>
+      <fieldset>
+        <legend>Daily / اليومية  </legend>
+        <button id="totalSellPrice" class="profit">$0.00</button>
+      </fieldset>
+    </div>
+  </header>
+  <main>
+    <table id="salesReportTable">
+      <thead>
+        <tr>
+          <tr>
+            <th>رقم الفاتورة <br> Invoice Number</th>
+            <th>اسم المنتج <br> Item Name</th>
+            <th>الكمية <br> Quantity</th>
+            <th>سعر المبيع <br> Selling Price</th>
+            <th>تكلفة المنتج <br> Product Cost</th>
+            <th>نسبة الربح <br> Profit Margin</th>
+            <th>التاريخ والوقت <br> Date and Time</th>
+            <th>إزالة <br> Remove</th>
+          </tr>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </main>
+  <footer></footer>
+  <script src="SalesReport.js"></script>
+
+<script>
+
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>T.S.S Home</title>
+  <link rel="stylesheet" href="Home.css" />
+</head>
+
+<body>
+  <header>
+    <div class="header-content">
+      <img src="icons/logo.png" alt="no logo" class="logo">
+      <div class="contact-info">For Updates Contact US 03873187 or 76954291</div>
+      <img src="icons/logo.png" alt="no logo" class="logo">
+
+    </div>
+  </header>
+
+  <main>
+    <div class="button-group">
+      <div class="section">
+
+        <div class="button-container">
+          <button id="sellButton" onclick="navigateToSellPage()"></button>
+          <button id="inventoryButton" onclick="navigateToInventoryPage()"></button>
+          <button id="addnew" onclick="navigateToNewItemsPage()"></button>
+          <button id="editqk" onclick="navigateToEditQuickMenuPage()"></button>
+        </div>
+      </div>
+
+      <div class="section">
+
+        <div class="button-container">
+          <button id="salesReportButton" onclick="navigateToSalesReportPage()"></button>
+          <button id="expiredate" onclick="navigateToExpireDatePage()"></button>
+          <button id="deptid" onclick="navigateToDeptPage()"></button>
+          <button id="chartid" onclick="navigateToChartPage()"></button>
+        </div>
+      </div>
+
+      <div class="section">
+
+        <div class="button-container">
+          <button id="tpsale" onclick="navigateTotopsalesPage()"></button>
+          <button id="xrated" onclick="navigateToRatePage()"></button>
+          <button id="manageid" onclick="navigateToManagerPage()"></button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+
+
+  <script>
+    function navigateToSellPage() {
+      window.location.href = "Sell.html";
+    }
+
+    function navigateToInventoryPage() {
+      window.location.href = "inventory.html";
+    }
+
+    function navigateToNewItemsPage() {
+      window.location.href = "NewItems.html";
+    }
+
+    function navigateToEditQuickMenuPage() {
+      window.location.href = "EditQmenu.html";
+    }
+
+    function navigateToExpireDatePage() {
+      window.location.href = "ExpiredItems.html";
+    }
+
+    function navigateToSalesReportPage() {
+      window.location.href = "SalesReport.html";
+    }
+
+    function navigateToDeptPage() {
+      window.location.href = "dept.html";
+    }
+
+    function navigateToChartPage() {
+      window.location.href = "dashboard.html";
+    }
+
+    function navigateToRatePage() {
+      window.location.href = "exchangeRate.html";
+    }
+
+    function navigateToManagerPage() {
+      window.location.href = "manager.html";
+    }
+    function navigateTotopsalesPage() {
+      window.location.href = "topsales.html";
+    }
+
+  </script>
+</body>
+
+</html>
